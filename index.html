@@ -27,12 +27,15 @@
   <input type="button" id="drawButton" onclick="draw()" value="draw">
   <input type="text" id="frequencyDisplay" value=0>
   <input type="text" id="note" value=0>
-    <input type="text" id="cents" value=0>
+  <input type="text" id="cents" value=0>
   <script>
     frequencyDisplay = document.getElementById("frequencyDisplay");
     noteValue = document.getElementById("note");
     centsInput = document.getElementById("cents");
     setUpDone = false;
+    lnoteArrayLength = 100;
+    lnoteArray = [];
+    time = 0;
     // analyser = "";
     // canvas = "";
     // canvasCtx = "";
@@ -63,96 +66,112 @@
       analyser.fftSize = 4096; //2048;
       bufferLength = analyser.frequencyBinCount;
       dataArray = new Uint8Array(bufferLength);
+
       //analyser.getByteTimeDomainData(dataArray);
       analyser.getByteFrequencyData(dataArray);
       // Get a canvas defined with ID "oscilloscope"
       canvas = document.getElementById("oscilloscope");
+      canvas.width = 900;
+      canvas.height = 300;
       canvasCtx = canvas.getContext("2d");
       console.log("END OF SETUP")
       //  }
     }
 
-        function lognote(freq) {
-          var oct = (Math.log(freq) - Math.log(261.626)) / Math.log(2) + 4.0;
-          return oct;
-        }
+    function lognote(freq) {
+      var oct = (Math.log(freq) - Math.log(261.626)) / Math.log(2) + 4.0;
+      return oct;
+    }
 
-        function freq_to_note(freq) {
-            var lnote = lognote(freq);
-          var oct = Math.floor(lnote);
-          var cents = 1200 * (lnote - oct);
-          var note_table = "C C#D D#E F F#G G#A A#B";
-          var offset = 50.0;
-          var x = 2;
-          if (cents < 50) {
-            note = "C ";
-          } else if (cents >= 1150) {
-            note = "C ";
-            cents -= 1200;
-            oct++;
-          } else {
-            for (j = 1; j <= 11; j++) {
-              if (cents >= offset && cents < (offset + 100)) {
-                noteValue.value = note_table.charAt(x) + note_table.charAt(x + 1);
-                cents -= (j * 100);
-                centsInput.value = Math.round(cents);
-                break;
-              }
-              offset += 100;
-              x += 2;
-            }
+    function freq_to_note(freq) {
+      var lnote = lognote(freq);
+      var oct = Math.floor(lnote);
+      var cents = 1200 * (lnote - oct);
+      var note_table = "C C#D D#E F F#G G#A A#B";
+      var offset = 50.0;
+      var x = 2;
+      if (cents < 50) {
+        note = "C ";
+      } else if (cents >= 1150) {
+        note = "C ";
+        cents -= 1200;
+        oct++;
+      } else {
+        for (j = 1; j <= 11; j++) {
+          if (cents >= offset && cents < (offset + 100)) {
+            noteValue.value = note_table.charAt(x) + note_table.charAt(x + 1);
+            cents -= (j * 100);
+            centsInput.value = Math.round(cents);
+            break;
           }
+          offset += 100;
+          x += 2;
         }
+      }
+    }
 
-        // draw an oscilloscope of the current audio source
+    // draw an oscilloscope of the current audio source
 
-        function draw() {
+    function draw() {
 
-          requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
 
-          analyser.getByteFrequencyData(dataArray);
-          max = 0;
-          j = 0;
-          for (i = 0; i < 1024; i++) {
-            if (dataArray[i] > max) {
-              max = dataArray[i];
-              j = i
-            }
-          }
-          freq = Math.round((j - 1) * 23.4 / 2);
-          frequencyDisplay.value = freq;
-
-          note.value = freq_to_note(freq);
-
-          canvasCtx.fillStyle = "rgb(200, 200, 200)";
-          canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-          canvasCtx.lineWidth = 2;
-          canvasCtx.strokeStyle = "rgb(0, 0, 0)";
-
-          canvasCtx.beginPath();
-
-          var sliceWidth = canvas.width * 1.0 / bufferLength;
-          var x = 0;
-          console.log(dataArray[0]);
-
-          for (var i = 0; i < bufferLength; i++) {
-
-            var v = dataArray[i] / 128.0;
-            var y = v * canvas.height / 2;
-
-            if (i === 0) {
-              canvasCtx.moveTo(x, y);
-            } else {
-              canvasCtx.lineTo(x, y);
-            }
-
-            x += sliceWidth;
-          }
-
-          canvasCtx.lineTo(canvas.width, canvas.height / 2);
-          canvasCtx.stroke();
+      analyser.getByteFrequencyData(dataArray);
+      max = 0;
+      j = 0;
+      for (i = 0; i < 1024; i++) {
+        if (dataArray[i] > max) {
+          max = dataArray[i];
+          j = i
         }
+      }
+      freq = Math.round((j - 1) * 23.4 / 2);
+      frequencyDisplay.value = freq;
+
+      freq_to_note(freq);
+      var note1 = note.value;
+      //lnoteArray.pop();
+      if (time == 3) {
+        if (lnoteArray.length = 100) {
+          lnoteArray.pop();
+        }
+        lnoteArray = [Math.round((lognote(frequencyDisplay.value) - 4) * 100), ...lnoteArray];
+
+        console.log(lnoteArray);
+        time = 0;
+      }
+      time++;
+
+      canvasCtx.fillStyle = "rgb(200, 200, 200)";
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = "rgb(0, 0, 0)";
+
+      canvasCtx.beginPath();
+
+      var sliceWidth = 10; //canvas.width * 1.0 / lnoteArrayLength;
+      var x = 0;
+      //console.log(dataArray[0]);
+
+      for (var i = 0; i < lnoteArrayLength; i++) {
+
+        //  var v = dataArray[i] / 128.0;
+        var v = lnoteArray[i];
+        var y = 250*4-v*4; //* canvas.height / 2;
+
+        if (i === 0) {
+          canvasCtx.moveTo(x, y);
+        } else {
+          canvasCtx.lineTo(x, y);
+        }
+        //canvasCtx.stroke();
+        x += sliceWidth;
+      }
+
+    //  canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      canvasCtx.stroke();
+    }
   </script>
 
 
