@@ -71,15 +71,16 @@
       analyser.getByteFrequencyData(dataArray);
       // Get a canvas defined with ID "oscilloscope"
       canvas = document.getElementById("oscilloscope");
-      canvas.width = 900;
-      canvas.height = 300;
+      canvas.width = 300;
+      canvas.height = 450;
       canvasCtx = canvas.getContext("2d");
-      console.log("END OF SETUP")
-      //  }
+
     }
 
     function lognote(freq) {
       var oct = (Math.log(freq) - Math.log(261.626)) / Math.log(2) + 4.0;
+      oct = Math.min(oct, 7);
+      oct = Math.max(oct, 4);
       return oct;
     }
 
@@ -135,7 +136,7 @@
         if (lnoteArray.length = 100) {
           lnoteArray.pop();
         }
-        lnoteArray = [Math.round((lognote(frequencyDisplay.value) - 4) * 100), ...lnoteArray];
+        lnoteArray = [Math.round((lognote(freq) - 4) * 100), ...lnoteArray];
 
         console.log(lnoteArray);
         time = 0;
@@ -147,7 +148,14 @@
 
       canvasCtx.lineWidth = 2;
       canvasCtx.strokeStyle = "rgb(0, 0, 0)";
-
+      for (var lnote = 0; lnote < 40; lnote++) {
+        var logf= lognote(Math.pow(2,(lnote/12)*440)-4)*100;
+        var y = 2.5 * (250 - logf) + 50; //* canvas.height / 2;
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(0, y);
+        canvasCtx.lineTo(350, y);
+        canvasCtx.stroke();
+      }
       canvasCtx.beginPath();
 
       var sliceWidth = 10; //canvas.width * 1.0 / lnoteArrayLength;
@@ -158,18 +166,20 @@
 
         //  var v = dataArray[i] / 128.0;
         var v = lnoteArray[i];
-        var y = 250*4-v*4; //* canvas.height / 2;
+        var y = 2.5 * (250 - v) + 50; //* canvas.height / 2;
 
         if (i === 0) {
           canvasCtx.moveTo(x, y);
         } else {
-          canvasCtx.lineTo(x, y);
+          if (10 < y < 500) {
+            canvasCtx.lineTo(x, y);
+          }
         }
         //canvasCtx.stroke();
         x += sliceWidth;
       }
 
-    //  canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      //  canvasCtx.lineTo(canvas.width, canvas.height / 2);
       canvasCtx.stroke();
     }
   </script>
