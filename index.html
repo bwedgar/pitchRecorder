@@ -88,7 +88,7 @@
       var lnote = lognote(freq);
       var oct = Math.floor(lnote);
       var cents = 1200 * (lnote - oct);
-      var note_table = "C C#D D#E F F#G G#A A#B";
+      var note_table = "C C#D D#E F F#G G#A A#B ";
       var offset = 50.0;
       var x = 2;
       if (cents < 50) {
@@ -138,7 +138,7 @@
         }
         lnoteArray = [Math.round((lognote(freq) - 4) * 100), ...lnoteArray];
 
-        console.log(lnoteArray);
+      //  console.log(lnoteArray);
         time = 0;
       }
       time++;
@@ -146,16 +146,22 @@
       canvasCtx.fillStyle = "rgb(200, 200, 200)";
       canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-      canvasCtx.lineWidth = 2;
-      canvasCtx.strokeStyle = "rgb(0, 0, 0)";
+      canvasCtx.lineWidth = 1;
+      canvasCtx.strokeStyle = "rgb(0, 0, 256)";
+
       for (var lnote = 0; lnote < 40; lnote++) {
-        var logf= lognote(Math.pow(2,(lnote/12)*440)-4)*100;
+        var logf = (lognote(Math.pow(2, (lnote / 12)) * 440) - 4) * 100;
         var y = 2.5 * (250 - logf) + 50; //* canvas.height / 2;
+        console.log(y);
         canvasCtx.beginPath();
-        canvasCtx.moveTo(0, y);
+        canvasCtx.moveTo(10, y);
         canvasCtx.lineTo(350, y);
         canvasCtx.stroke();
+        freq_to_note(Math.pow(2, (lnote / 12)) * 440);
+        canvasCtx.strokeText(noteValue.value,5,y+2+10)
       }
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = "rgb(0, 0, 0)";
       canvasCtx.beginPath();
 
       var sliceWidth = 10; //canvas.width * 1.0 / lnoteArrayLength;
