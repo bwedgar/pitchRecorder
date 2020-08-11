@@ -16,10 +16,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-
-
 </head>
-
 
 <body>
   <canvas id="oscilloscope"></canvas>
@@ -111,7 +108,7 @@
       }
     }
 
-    // draw an oscilloscope of the current audio source
+    // draw a trace of frequency over time
 
     function draw() {
 
@@ -132,7 +129,7 @@
       freq_to_note(freq);
       var note1 = note.value;
       //lnoteArray.pop();
-      if (time == 3) {
+      if (time == 6) {
         if (lnoteArray.length = 100) {
           lnoteArray.pop();
         }
@@ -152,7 +149,7 @@
       for (var lnote = 0; lnote < 40; lnote++) {
         var logf = (lognote(Math.pow(2, (lnote / 12)) * 440) - 4) * 100;
         var y = 2.5 * (250 - logf) + 50; //* canvas.height / 2;
-        console.log(y);
+      //  console.log(y);
         canvasCtx.beginPath();
         canvasCtx.moveTo(10, y);
         canvasCtx.lineTo(350, y);
@@ -166,8 +163,6 @@
 
       var sliceWidth = 10; //canvas.width * 1.0 / lnoteArrayLength;
       var x = 0;
-      //console.log(dataArray[0]);
-
       for (var i = 0; i < lnoteArrayLength; i++) {
 
         //  var v = dataArray[i] / 128.0;
@@ -177,20 +172,14 @@
         if (i === 0) {
           canvasCtx.moveTo(x, y);
         } else {
-          if (10 < y < 500) {
+          if (10 < y < 500) { //clip high and low frequency off the graph
             canvasCtx.lineTo(x, y);
           }
         }
-        //canvasCtx.stroke();
         x += sliceWidth;
       }
-
-      //  canvasCtx.lineTo(canvas.width, canvas.height / 2);
       canvasCtx.stroke();
     }
   </script>
-
-
 </body>
-
 </html>
